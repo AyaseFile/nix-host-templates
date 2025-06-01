@@ -28,6 +28,7 @@
                 settings = {
                   crypttabExtraOpts = [
                     "tpm2-device=auto"
+                    "tpm2-measure-pcr=yes"
                     "password-echo=no"
                     "discard"
                   ];

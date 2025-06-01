@@ -56,8 +56,9 @@
 
   boot.initrd.compressor = "zstd";
   boot.initrd.systemd.enable = true;
-  boot.initrd.luks.devices."system".crypttabExtraOpts = [
+  boot.initrd.luks.devices.system.crypttabExtraOpts = [
     "tpm2-device=auto"
+    "tpm2-measure-pcr=yes"
     "password-echo=no"
     "discard"
   ];
