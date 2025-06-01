@@ -4,6 +4,11 @@
     nix-config = {
       url = "github:AyaseFile/nix-config/main";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nur-packages.follows = "nur-packages";
+    };
+    nur-packages = {
+      url = "github:AyaseFile/nur-packages/main";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -28,6 +33,7 @@
           result = module {
             inherit pkgs;
             lib = fakeLib;
+            nur-overlays = inputs.nur-packages.overlays;
             config.modules.pkgs = {
               cli.enable = true;
               fonts.enable = true;
@@ -42,17 +48,17 @@
       utils = evalModule (import "${inputs.nix-config}/modules/pkgs/utils.nix");
     in
     {
-      packages.${system} = {
+      packages.${system} = with pkgs; {
         default = pkgs.symlinkJoin {
           name = "default";
           paths = [
             cli
             fonts
             utils
-            pkgs.man
-            pkgs.fish
-            pkgs.direnv
-            pkgs.nix-direnv
+            man
+            fish
+            direnv
+            nix-direnv
           ];
         };
       };
