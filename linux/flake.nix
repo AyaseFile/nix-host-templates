@@ -49,7 +49,7 @@
     in
     {
       packages.${system} = with pkgs; {
-        default = pkgs.symlinkJoin {
+        default = symlinkJoin {
           name = "default";
           paths = [
             cli
