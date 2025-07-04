@@ -4,6 +4,7 @@
   uid,
   user,
   unfree,
+  flake,
   ...
 }:
 
@@ -39,13 +40,18 @@
 
   environment.systemPackages = with pkgs; [
     git
+    nh
   ];
+
+  environment.variables = {
+    NH_FLAKE = flake;
+  };
 
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
-      upgrade = true;
+      autoUpdate = false;
+      upgrade = false;
       cleanup = "zap";
     };
   };

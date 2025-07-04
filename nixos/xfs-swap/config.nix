@@ -1,8 +1,9 @@
 {
   pkgs,
+  user,
   host,
   unfree,
-  user,
+  flake,
   ...
 }:
 
@@ -70,6 +71,8 @@
     };
   };
 
+  console.enable = false;
+
   environment.systemPackages = with pkgs; [
     git
   ];
@@ -83,7 +86,15 @@
     hybrid-sleep.enable = false;
   };
 
-  documentation.man.generateCaches = false;
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      dates = "daily";
+      extraArgs = "--nogcroots";
+    };
+    flake = flake;
+  };
 
   i18n = {
     defaultLocale = "zh_CN.UTF-8";
@@ -92,6 +103,8 @@
       "en_US.UTF-8/UTF-8"
     ];
   };
+
+  documentation.man.generateCaches = false;
 
   system.stateVersion = "25.05";
 }
