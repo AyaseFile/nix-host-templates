@@ -1,6 +1,7 @@
 {
   modulesPath,
   pkgs,
+  lib,
   user,
   host,
   unfree,
@@ -42,7 +43,7 @@
 
   security.sudo.extraRules = [
     {
-      groups = [ user ];
+      users = [ user ];
       commands = [
         {
           command = "ALL";
@@ -66,7 +67,7 @@
     };
   };
 
-  console.enable = false;
+  console.enable = lib.mkForce false;
 
   environment.systemPackages = with pkgs; [
     git
