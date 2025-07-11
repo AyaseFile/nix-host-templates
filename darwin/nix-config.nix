@@ -23,8 +23,13 @@
     brews = [
       "pinentry-mac"
     ];
-    casks = [
-      "wezterm@nightly"
-    ];
+    casks =
+      [
+        "wezterm@nightly"
+      ]
+      ++ map (name: {
+        inherit name;
+        greedy = true;
+      }) [ ];
   };
 }
