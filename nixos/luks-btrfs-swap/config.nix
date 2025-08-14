@@ -1,157 +1,44 @@
+{ host, nix-mods, ... }:
+
+let
+  user = "<user>";
+  stateVersion = "25.05";
+  useZen = true;
+  unfree = true;
+  ssh = true;
+  tty = false;
+  secureboot = false;
+  flake = "/etc/nixos";
+in
 {
-  pkgs,
-  user,
-  host,
-  unfree,
-  flake,
-  ...
-}:
-
-{
-  imports = [ ./hardware-config.nix ];
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
+  imports = [
+    nix-mods.nixos
+    nix-mods.luks
+    nix-mods.btrfs
+    nix-mods.secureboot
+    nix-mods.pkgs
+    ./hardware-config.nix
   ];
 
-  nixpkgs.config.allowUnfree = unfree;
-
-  fileSystems = {
-    "/".options = [
-      "compress=zstd"
-      "noatime"
-    ];
-    "/home".options = [
-      "compress=zstd"
-      "noatime"
-    ];
-    "/nix".options = [
-      "compress=zstd"
-      "noatime"
-    ];
-    "/swap".options = [
-      "noatime"
-    ];
-    "/var/log" = {
-      options = [
-        "compress=zstd"
-        "noatime"
-      ];
-      neededForBoot = true;
-    };
-  };
-
-  swapDevices = [ { device = "/swap/swapfile"; } ];
-
-  services.fstrim.enable = true;
-
-  services.btrfs.autoScrub.enable = true;
-
-  boot.kernelPackages = pkgs.linuxPackages_zen;
-  boot.supportedFilesystems = [ "btrfs" ];
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.efi.efiSysMountPoint = "/efi";
-
-  boot.initrd.compressor = "zstd";
-  boot.initrd.systemd.enable = true;
-  boot.initrd.luks.devices.system.crypttabExtraOpts = [
-    "tpm2-device=auto"
-    "tpm2-measure-pcr=yes"
-    "password-echo=no"
-    "discard"
-  ];
-
-  hardware.enableAllFirmware = true;
-  services.fwupd.enable = true;
-
-  networking.hostName = host;
-  networking.networkmanager.enable = true;
-  networking.firewall.enable = true;
-
-  time.timeZone = "Asia/Shanghai";
-
-  services.pipewire = {
+  modules.nixos = {
     enable = true;
-    alsa = {
-      enable = true;
-      support32Bit = true;
-    };
-    pulse.enable = true;
+    inherit
+      user
+      host
+      stateVersion
+      useZen
+      unfree
+      ssh
+      tty
+      flake
+      ;
   };
 
-  users = {
-    defaultUserShell = pkgs.fish;
-    users.${user} = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-    };
-  };
+  modules.luks.enable = true;
 
-  programs.fish = {
-    enable = true;
-    vendor.config.enable = true;
-    vendor.functions.enable = true;
-  };
+  modules.btrfs.enable = true;
 
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      Ciphers = [
-        "chacha20-poly1305@openssh.com"
-        "aes256-gcm@openssh.com"
-      ];
-      KexAlgorithms = [
-        "mlkem768x25519-sha256"
-        "sntrup761x25519-sha512"
-        "sntrup761x25519-sha512@openssh.com"
-      ];
-      Macs = [
-        "hmac-sha2-512-etm@openssh.com"
-        "hmac-sha2-256-etm@openssh.com"
-      ];
-    };
-  };
+  modules.secureboot.enable = secureboot;
 
-  console.enable = false;
-
-  environment.systemPackages = with pkgs; [
-    git
-  ];
-
-  programs.gnupg.agent.enable = true;
-
-  systemd.targets = {
-    sleep.enable = false;
-    suspend.enable = false;
-    hibernate.enable = false;
-    hybrid-sleep.enable = false;
-  };
-
-  programs.nh = {
-    enable = true;
-    clean = {
-      enable = true;
-      dates = "daily";
-      extraArgs = "--nogcroots";
-    };
-    flake = flake;
-  };
-
-  i18n = {
-    defaultLocale = "zh_CN.UTF-8";
-    supportedLocales = [
-      "zh_CN.UTF-8/UTF-8"
-      "en_US.UTF-8/UTF-8"
-    ];
-  };
-
-  documentation.man.generateCaches = false;
-
-  system.stateVersion = "25.05";
+  modules.pkgs.cli.enable = true;
 }

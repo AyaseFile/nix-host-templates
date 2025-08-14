@@ -19,12 +19,8 @@
   outputs =
     inputs@{ nix-darwin, ... }:
     let
-      uid = 501;
-      user = "<user>";
       host = "<host>";
       system = "aarch64-darwin";
-      unfree = false;
-      flake = "<flake>";
       nix-mods = inputs.nix-config.modules;
       nur-mods = inputs.nur-packages.modules;
       nur-pkgs = inputs.nur-packages.packages.${system};
@@ -34,12 +30,8 @@
         system = system;
         specialArgs = inputs // {
           inherit
-            uid
-            user
             host
             system
-            unfree
-            flake
             nix-mods
             nur-mods
             nur-pkgs
@@ -47,7 +39,6 @@
         };
         modules = [
           ./config.nix
-          ./nix-config.nix
         ];
       };
     };

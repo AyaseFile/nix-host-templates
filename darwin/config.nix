@@ -1,67 +1,59 @@
 {
   self,
   pkgs,
-  uid,
-  user,
-  unfree,
-  flake,
+  nix-mods,
   ...
 }:
 
+let
+  uid = 501;
+  user = "<user>";
+  rev = self.rev or self.dirtyRev or null;
+  unfree = false;
+  flake = "<flake>";
+in
 {
-  nix = {
-    enable = true;
-    settings = {
-      sandbox = true;
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-    };
-  };
-
-  nixpkgs.config.allowUnfree = unfree;
-
-  users = {
-    knownUsers = [ user ];
-    users.${user} = {
-      uid = uid;
-      shell = pkgs.fish;
-    };
-  };
-
-  security.pam.services.sudo_local.touchIdAuth = true;
-
-  programs.fish = {
-    enable = true;
-    vendor.config.enable = true;
-    vendor.functions.enable = true;
-  };
-
-  environment.systemPackages = with pkgs; [
-    git
-    nh
+  imports = [
+    nix-mods.darwin
+    nix-mods.pkgs
+    nix-mods.direnv
   ];
 
-  environment.variables = {
-    NH_FLAKE = flake;
+  modules.darwin = {
+    enable = true;
+    inherit
+      uid
+      user
+      rev
+      unfree
+      flake
+      ;
   };
+
+  modules.pkgs = {
+    cli.enable = true;
+    fonts.enable = true;
+    utils.enable = true;
+  };
+
+  modules.direnv.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    coreutils
+    findutils
+    rsync
+  ];
 
   homebrew = {
-    enable = true;
-    onActivation = {
-      autoUpdate = true;
-      upgrade = true;
-      cleanup = "zap";
-      extraFlags = [
-        "--verbose"
-      ];
-    };
-  };
-
-  system = {
-    primaryUser = user;
-    configurationRevision = self.rev or self.dirtyRev or null;
-    stateVersion = 6;
+    brews = [
+      "pinentry-mac"
+    ];
+    casks = [
+      "wezterm@nightly"
+    ]
+    ++ map (name: {
+      inherit name;
+      greedy = true;
+    }) [ ];
   };
 }

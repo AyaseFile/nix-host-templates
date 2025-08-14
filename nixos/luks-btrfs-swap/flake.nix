@@ -15,11 +15,8 @@
   outputs =
     inputs@{ nixpkgs, ... }:
     let
-      user = "<user>";
       host = "<host>";
       system = "x86_64-linux";
-      unfree = true;
-      flake = "/etc/nixos";
       nix-mods = inputs.nix-config.modules;
       nur-mods = inputs.nur-packages.modules;
       nur-pkgs = inputs.nur-packages.packages.${system};
@@ -29,11 +26,8 @@
         system = system;
         specialArgs = inputs // {
           inherit
-            user
             host
             system
-            unfree
-            flake
             nix-mods
             nur-mods
             nur-pkgs
@@ -41,7 +35,6 @@
         };
         modules = [
           ./config.nix
-          ./nix-config.nix
         ];
       };
     };

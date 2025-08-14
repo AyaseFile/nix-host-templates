@@ -17,6 +17,9 @@
     let
       system = "x86_64-linux";
       unfree = false;
+      cli = true;
+      fonts = false;
+      utils = false;
       pkgs = import nixpkgs {
         inherit system;
         config = {
@@ -35,30 +38,28 @@
             lib = fakeLib;
             nur-overlays = inputs.nur-packages.overlays;
             config.modules.pkgs = {
-              cli.enable = true;
-              fonts.enable = true;
-              utils.enable = true;
+              cli.enable = cli;
+              fonts.enable = fonts;
+              utils.enable = utils;
             };
           };
           config = result.config or { };
         in
         config.environment.systemPackages or config.fonts.packages or [ ];
-      cli = evalModule (import "${inputs.nix-config}/modules/pkgs/cli.nix");
-      fonts = evalModule (import "${inputs.nix-config}/modules/pkgs/fonts.nix");
-      utils = evalModule (import "${inputs.nix-config}/modules/pkgs/utils.nix");
+      cli-pkgs = evalModule (import "${inputs.nix-config}/modules/pkgs/cli.nix");
+      fonts-pkgs = evalModule (import "${inputs.nix-config}/modules/pkgs/fonts.nix");
+      utils-pkgs = evalModule (import "${inputs.nix-config}/modules/pkgs/utils.nix");
     in
     {
       packages.${system} = with pkgs; {
         default = symlinkJoin {
           name = "default";
           paths = [
-            cli
-            fonts
-            utils
+            cli-pkgs
+            fonts-pkgs
+            utils-pkgs
             man
             fish
-            direnv
-            nix-direnv
           ];
         };
       };
